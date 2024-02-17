@@ -27,7 +27,7 @@ router.post('/', async (req, res) => {
     
     username = email.split('@')[0];
     const result = await sql`
-      INSERT INTO users (email, username, password_hash,first_name,last_name)
+      INSERT INTO users (email, username, password,first_name,last_name)
       VALUES ( ${email},${username}, ${password},${first_name},${last_name})`;
     res.status(201).json(result[0]);
   } catch (error) {

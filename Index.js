@@ -1,5 +1,6 @@
 const express = require('express');
 const postgres = require('postgres');
+const bcrypt = require('bcrypt');
 const app = express();
 const signupRouter = require('./signup');
 app.use(express.json());
@@ -34,6 +35,18 @@ const sql = postgres({
 });
 
 
+app.get('/', async (req, res) => {
+    try {
+      const { email, password } = req.query;
+      const existingUser = await sql`
+        SELECT *  FROM users WHERE email = ${email} and password = ${password}
+      `;
+        res.json(existingUser);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
 
 
 
