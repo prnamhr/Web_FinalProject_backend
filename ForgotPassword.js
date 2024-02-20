@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const postgres = require('postgres');
-const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
 
@@ -22,11 +21,8 @@ const sql = postgres({
     options: `project=${ENDPOINT_ID}`,
   },
 });
-function generateUniqueToken() {
-    return crypto.randomBytes(20).toString('hex');
-  }
 
-  async function sendResetPasswordEmail(email, token) {
+  async function sendResetPasswordEmail(email, username) {
 
     const transporter = nodemailer.createTransport({
       service: 'hotmail',
@@ -41,7 +37,7 @@ function generateUniqueToken() {
         subject: 'Password Reset',
         text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n
         Please click on the following link, or paste this into your browser to complete the process:\n\n
-        http://<frontend-url>/reset/${token}\n\n
+        http://localhost:5174/${username}\n\n
         If you did not request this, please ignore this email and your password will remain unchanged.\n`,
       };
     
@@ -64,15 +60,8 @@ function generateUniqueToken() {
                 return res.status(404).json({ error: 'User not found' });
             }
             const user = users[0];
-    
-            const resetToken = generateUniqueToken();
-            await sql`
-                UPDATE users
-                SET password = ${resetToken}
-                WHERE user_id = ${user.user_id}
-            `;
-           
-            await sendResetPasswordEmail(user.email, resetToken);
+
+            await sendResetPasswordEmail(user.email,user.username);
             console.log(user.user_id);
 
             res.json({ message: 'Password reset email sent successfully' });

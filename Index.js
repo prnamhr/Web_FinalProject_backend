@@ -1,11 +1,9 @@
 const express = require('express');
 const postgres = require('postgres');
-const bcrypt = require('bcrypt');
 const app = express();
 const signupRouter = require('./signup');
 const forgotpassword = require('./ForgotPassword');
-const router = require('./ForgotPassword');
-
+const postCreation =require('./PostCreation');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
@@ -19,6 +17,7 @@ app.use(function (_, res, next) {
 });
 app.use('/signup', signupRouter);
 app.use('/forgotpassword', forgotpassword);
+app.use('/postCreation',postCreation);
 const port = 3000;
 PGHOST='ep-cool-violet-a5nymoqn.us-east-2.aws.neon.tech'
 PGDATABASE='Pinterest'
