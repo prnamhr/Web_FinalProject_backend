@@ -51,6 +51,18 @@ app.get('/', async (req, res) => {
     }
   });
 
+app.get('/pins', async (req, res) => {
+    try {
+        const pins = await sql`
+        SELECT *  FROM posts
+      `;
+        res.json(pins);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 
 app.listen(port, () => console.log(`My App listening at http://localhost:${port}`));
