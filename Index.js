@@ -5,6 +5,7 @@ const signupRouter = require('./signup');
 const forgotpassword = require('./ForgotPassword');
 const postCreation =require('./PostCreation');
 const post = require('./post')
+const cors = require('cors');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
@@ -19,7 +20,8 @@ app.use(function (_, res, next) {
 app.use('/signup', signupRouter);
 app.use('/forgotpassword', forgotpassword);
 app.use('/postCreation',postCreation);
-app.use('/post',post)
+app.use('/post',post);
+app.use(cors());
 const port = 3000;
 PGHOST='ep-cool-violet-a5nymoqn.us-east-2.aws.neon.tech'
 PGDATABASE='Pinterest'

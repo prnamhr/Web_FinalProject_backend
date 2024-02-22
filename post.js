@@ -44,8 +44,6 @@ router.get('/:postId', async (req, res) => {
 router.post('/:username/:postId/comment', async (req, res) => {
     const { username,postId } = req.params;
     const { comment_text } = req.body;
-    console.log(comment_text,postId,username)
-
     try {
         const result = await sql`
             INSERT INTO comments (post_id, user_id, comment_text)
@@ -67,7 +65,6 @@ router.get('/:postId/comments', async (req, res) => {
             SELECT * FROM comments
             INNER JOIN users ON comments.user_Id = users.user_Id
             WHERE post_id = ${postId}`;
-        console.log(comments)
         res.json(comments);
     } catch (error) {
         console.error(error);
@@ -75,7 +72,72 @@ router.get('/:postId/comments', async (req, res) => {
     }
 });
 
+router.get('/:postId/likes', async (req, res) => {
+    const { postId } = req.params;
 
+    try {
+        const likes = await sql`
+            SELECT * FROM liked_posts
+            WHERE post_id = ${postId}`;
+        console.log(likes)
+
+        res.json(likes);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.post('/:username/:postId/like', async (req, res) => {
+    const { username, postId } = req.params;
+
+    try {
+        // Check if the user already liked the post
+        const likedPost = await sql`
+            SELECT * FROM liked_posts
+            WHERE user_id = (SELECT user_id FROM users WHERE username = ${username})
+            AND post_id = ${postId}`;
+
+        if (likedPost.length > 0) {
+            // User already liked the post, remove the like
+            await sql`
+                DELETE FROM liked_posts
+                WHERE user_id = (SELECT user_id FROM users WHERE username = ${username})
+                AND post_id = ${postId}`;
+
+            res.json({ isLiked: false });
+        } else {
+            // User hasn't liked the post, add the like
+            const result = await sql`
+                INSERT INTO liked_posts (user_id, post_id)
+                VALUES (
+                    (SELECT user_id FROM users WHERE username = ${username}),
+                    ${postId}
+                )
+                RETURNING *`;
+
+            res.json({ isLiked: true });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get('/:username/:postId/like', async (req, res) => {
+    const { username,postId } = req.params;
+
+    try {
+        // Check if the user liked the post
+        const likedPost = await sql`
+            SELECT * FROM liked_posts
+            WHERE user_id = (SELECT user_id FROM users WHERE username = ${username})
+            AND post_id = ${postId}`;
+
+        res.json({ isLiked: likedPost.length > 0 });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 
 module.exports = router;
