@@ -3,23 +3,19 @@ const router = express.Router();
 const postgres = require('postgres');
 const nodemailer = require('nodemailer');
 
-
-PGHOST='ep-cool-violet-a5nymoqn.us-east-2.aws.neon.tech'
-PGDATABASE='Pinterest'
-PGUSER='parnamehri'
-PGPASSWORD='4Mtje8AfKsxZ'
-ENDPOINT_ID='ep-cool-violet-a5nymoqn'
+const config = require('./config'); //
+const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = config;
 
 const sql = postgres({
-  host: PGHOST,
-  database: PGDATABASE,
-  username: PGUSER,
-  password: PGPASSWORD,
-  port: 5432,
-  ssl: 'require',
-  connection: {
-    options: `project=${ENDPOINT_ID}`,
-  },
+    host: PGHOST,
+    database: PGDATABASE,
+    username: PGUSER,
+    password: PGPASSWORD,
+    port: 5432,
+    ssl: 'require',
+    connection: {
+        options: `project=${ENDPOINT_ID}`,
+    },
 });
 
   async function sendResetPasswordEmail(email, username) {

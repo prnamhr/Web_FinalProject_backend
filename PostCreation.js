@@ -12,11 +12,8 @@ const upload = multer({
     },
 });
 
-const PGHOST = 'ep-cool-violet-a5nymoqn.us-east-2.aws.neon.tech';
-const PGDATABASE = 'Pinterest';
-const PGUSER = 'parnamehri';
-const PGPASSWORD = '4Mtje8AfKsxZ';
-const ENDPOINT_ID = 'ep-cool-violet-a5nymoqn';
+const config = require('./config'); //
+const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = config;
 
 const sql = postgres({
     host: PGHOST,

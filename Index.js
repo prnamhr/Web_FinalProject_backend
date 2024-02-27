@@ -23,22 +23,20 @@ app.use('/postCreation',postCreation);
 app.use('/post',post);
 app.use(cors());
 const port = 3000;
-PGHOST='ep-cool-violet-a5nymoqn.us-east-2.aws.neon.tech'
-PGDATABASE='Pinterest'
-PGUSER='parnamehri'
-PGPASSWORD='4Mtje8AfKsxZ'
-ENDPOINT_ID='ep-cool-violet-a5nymoqn'
+
+const config = require('./config'); //
+const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = config;
 
 const sql = postgres({
-  host: PGHOST,
-  database: PGDATABASE,
-  username: PGUSER,
-  password: PGPASSWORD,
-  port: 5432,
-  ssl: 'require',
-  connection: {
-    options: `project=${ENDPOINT_ID}`,
-  },
+    host: PGHOST,
+    database: PGDATABASE,
+    username: PGUSER,
+    password: PGPASSWORD,
+    port: 5432,
+    ssl: 'require',
+    connection: {
+        options: `project=${ENDPOINT_ID}`,
+    },
 });
 
 
@@ -54,6 +52,23 @@ app.get('/', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+
+
+app.get('/:username/finduser', async (req, res) => {
+    try {
+        const { username } = req.params;
+        const existingUser = await sql`
+    SELECT * FROM users
+    WHERE username LIKE '%' || ${username} || '%';
+`;
+
+        console.log(existingUser)
+        res.json(existingUser);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 app.get('/pins', async (req, res) => {
     try {
