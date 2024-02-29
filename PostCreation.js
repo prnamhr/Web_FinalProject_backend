@@ -74,7 +74,6 @@ router.get('/getUserId', async (req, res) => {
             FROM users
             WHERE username = ${username};
         `;
-        console.log( userIdResult[0].user_id )
         if (userIdResult.length > 0) {
             res.json({ user_id: userIdResult[0].user_id });
         } else {

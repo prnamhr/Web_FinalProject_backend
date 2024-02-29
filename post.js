@@ -76,7 +76,6 @@ router.get('/:postId/likes', async (req, res) => {
         const likes = await sql`
             SELECT * FROM liked_posts
             WHERE post_id = ${postId}`;
-        console.log(likes)
 
         res.json(likes);
     } catch (error) {
