@@ -43,7 +43,7 @@ const storage = getStorage(app)
 router.post('/:userId/photo', upload.single('photo'), async (req, res) => {
     try {
         const { userId } = req.params;
-        console.log(req.file)
+
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
@@ -153,8 +153,12 @@ router.get('/:userId/followers', async (req, res) => {
     try {
         const { userId } = req.params;
 
-        // Get followers of a user
-        const followers = await sql`SELECT * FROM followers WHERE user_id = ${userId}`;
+        const followers = await sql`
+            SELECT *
+            FROM followers f inner join users u
+            on f.follower_user_id=u.user_id
+           WHERE f.user_id = ${userId}
+        `;
 
         res.json(followers);
     } catch (error) {
@@ -166,9 +170,13 @@ router.get('/:userId/followers', async (req, res) => {
 router.get('/:userId/following', async (req, res) => {
     try {
         const { userId } = req.params;
-
-        // Get users that a user is following
-        const following = await sql`SELECT * FROM following WHERE user_id = ${userId}`;
+        console.log(userId)
+        const following = await sql`
+            SELECT *
+            FROM following f inner join users u
+            on f.following_user_id=u.user_id
+           WHERE f.user_id = ${userId}
+        `;
 
         res.json(following);
     } catch (error) {
