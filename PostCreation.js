@@ -1,5 +1,4 @@
 const firebase = require('firebase/app');
-const { getAnalytics } = require('firebase/analytics');
 const { getStorage, ref, uploadBytes } = require('firebase/storage');
 
 const express = require('express');

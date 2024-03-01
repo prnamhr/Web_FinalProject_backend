@@ -115,6 +115,23 @@ router.get('/:username/isFollowing/:targetUsername', async (req, res) => {
     }
 });
 
+router.get('/:userId/:postId/isSaved/', async (req, res) => {
+    const { userId,postId } = req.params;
+
+    try {
+
+        const isSaved = await sql`
+            SELECT * FROM saved_posts
+            WHERE user_id =  ${userId}
+            AND post_Id =  ${postId}`;
+
+        res.json({ isSaved: isSaved.length > 0 });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 router.post('/:username/follow', async (req, res) => {
     const { username } = req.params;
     console.log(username);
@@ -159,6 +176,41 @@ router.post('/:username/follow', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+router.post('/:postId/savePost', async (req, res) => {
+    const { postId } = req.params;
+    const { user_id } = req.body;
+
+    try {
+        const isSave = await sql`
+            SELECT * FROM saved_posts 
+            WHERE user_id =  ${user_id}
+            AND post_id= ${postId}`;
+
+        if (isSave.length > 0) {
+            await sql`
+                DELETE FROM saved_posts
+                WHERE user_id =  ${user_id}
+                AND post_id= ${postId}`;
+
+            res.json({ isFollowing: false });
+        } else {
+            const result = await sql`
+                INSERT INTO saved_posts (user_id, post_id)
+                VALUES (
+                    ${user_id},
+                    ${postId}  -- Fix the typo here
+                )
+                RETURNING *`;
+
+            res.json({ isFollowing: true });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 router.delete('/:postId/delete', async (req, res) => {
     try {
         const { postId } = req.params;
@@ -239,5 +291,24 @@ router.get('/:username/:postId/like', async (req, res) => {
     }
 });
 
+router.get('/:userId/saveList', async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const followers = await sql`
+            SELECT *
+            FROM saved_posts s inner join
+            posts p on p.post_id=s.post_id inner join
+            users u
+            on s.user_id=u.user_id
+            where u.user_id=${userId}
+        `;
+
+        res.json(followers);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 module.exports = router;
