@@ -38,6 +38,36 @@ router.get('/:postId', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+router.post('/:postId/update', async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const { title,description  } = req.body;
+        let updatedUser;
+        if (title) {
+
+            updatedUser = await sql`
+                UPDATE posts
+                SET title = ${title}
+                WHERE post_id = ${postId}
+                RETURNING *
+            `;
+        }
+        if (description) {
+
+            updatedUser = await sql`
+                UPDATE users
+                SET description = ${description}
+                WHERE postId = ${postId}
+                RETURNING *
+            `;
+        }
+        res.json({ success: true, message: 'Profile updated successfully'});
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 router.post('/:username/:postId/comment', async (req, res) => {
     const { username,postId } = req.params;
     const { comment_text } = req.body;
@@ -129,7 +159,20 @@ router.post('/:username/follow', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+router.delete('/:postId/delete', async (req, res) => {
+    try {
+        const { postId } = req.params;
 
+        await sql`DELETE FROM posts WHERE post_id = ${postId}`;
+
+        // You might want to delete associated data from other tables (e.g., followers, following)
+
+        res.json({ success: true, message: 'Account deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 router.get('/:postId/likes', async (req, res) => {
     const { postId } = req.params;
 

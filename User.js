@@ -167,6 +167,25 @@ router.get('/:userId/followers', async (req, res) => {
     }
 });
 
+
+router.get('/:userId/posts', async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const posts = await sql`
+            SELECT *
+            FROM posts p
+   
+           WHERE p.user_id = ${userId}
+        `;
+
+        res.json(posts);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 router.get('/:userId/following', async (req, res) => {
     try {
         const { userId } = req.params;
