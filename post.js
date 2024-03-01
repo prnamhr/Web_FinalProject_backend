@@ -1,6 +1,6 @@
 const express = require('express');
 const postgres = require('postgres');
-
+const cors = require('cors');
 const config = require('./config'); //
 const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = config;
 
@@ -17,7 +17,7 @@ const sql = postgres({
 });
 
 const router = express.Router(); // Fixed typo here
-
+router.use(cors());
 router.get('/:postId', async (req, res) => {
     const { postId } = req.params;
 
@@ -63,6 +63,67 @@ router.get('/:postId/comments', async (req, res) => {
             INNER JOIN users ON comments.user_Id = users.user_Id
             WHERE post_id = ${postId}`;
         res.json(comments);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.get('/:username/isFollowing/:targetUsername', async (req, res) => {
+    const { username, targetUsername } = req.params;
+
+    try {
+        // Check if the user is following the target user
+        const isFollowing = await sql`
+            SELECT * FROM following
+            WHERE user_id = (SELECT user_id FROM users WHERE username = ${username})
+            AND following_user_id = (SELECT user_id FROM users WHERE username = ${targetUsername})`;
+
+        res.json({ isFollowing: isFollowing.length > 0 });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+router.post('/:username/follow', async (req, res) => {
+    const { username } = req.params;
+    console.log(username);
+
+    const { user_id } = req.body;
+    console.log(user_id);
+    try {
+        const isFollowing = await sql`
+            SELECT * FROM following
+            WHERE user_id = (SELECT user_id FROM users WHERE username = ${username})
+            AND following_user_id = ${user_id}`;
+        console.log('hiii');
+        if (isFollowing.length > 0) {
+            await sql`
+                DELETE FROM following
+                WHERE user_id = (SELECT user_id FROM users WHERE username = ${username})
+                AND following_user_id = ${user_id}`;
+
+            await sql`
+                DELETE FROM followers
+                WHERE user_id = ${user_id}
+                AND follower_user_id = (SELECT user_id FROM users WHERE username = ${username})`;
+            res.json({ isFollowing: false });
+        } else {
+
+            const result = await sql`
+                INSERT INTO following (user_id, following_user_id)
+                VALUES (
+                    (SELECT user_id FROM users WHERE username = ${username}),
+                    ${user_id}
+                )
+                RETURNING *`;
+
+            await sql`
+                INSERT INTO followers (user_id, follower_user_id)
+                VALUES (${user_id}, (SELECT user_id FROM users WHERE username = ${username}))`;
+            
+            res.json({ isFollowing: true });
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
