@@ -1,6 +1,6 @@
 
 module.exports={
-    app:[{
+    apps:[{
         name:'Backend',
         script:'Index.js',
         env:{
