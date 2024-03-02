@@ -68,11 +68,12 @@ router.post('/:userId/photo', upload.single('photo'), async (req, res) => {
 });
 router.post('/:userId/update', async (req, res) => {
     try {
-        const {userId} = req.params;
-        const {first_name, last_name, bio, username} = req.body;
-        let updatedUser;
-        if (first_name) {
+        const { userId } = req.params;
+        const { first_name, last_name, bio, username } = req.body;
 
+        let updatedUser = null;
+
+        if (first_name) {
             updatedUser = await sql`
                 UPDATE users
                 SET first_name = ${first_name}
@@ -80,8 +81,8 @@ router.post('/:userId/update', async (req, res) => {
                 RETURNING *
             `;
         }
-        if (last_name) {
 
+        if (last_name) {
             updatedUser = await sql`
                 UPDATE users
                 SET last_name = ${last_name}
@@ -89,6 +90,7 @@ router.post('/:userId/update', async (req, res) => {
                 RETURNING *
             `;
         }
+
         if (bio) {
             updatedUser = await sql`
                 UPDATE users
@@ -97,6 +99,7 @@ router.post('/:userId/update', async (req, res) => {
                 RETURNING *
             `;
         }
+
         if (username) {
             updatedUser = await sql`
                 UPDATE users
@@ -105,12 +108,19 @@ router.post('/:userId/update', async (req, res) => {
                 RETURNING *
             `;
         }
+
+        if (!updatedUser) {
+
+             return res.json(0);
+        }
+
         res.json(updatedUser[0]);
     } catch (error) {
         console.error(error);
-        res.status(500).json({error: 'Internal Server Error'});
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 
 router.post('/:userId/account', async (req, res) => {
     try {
