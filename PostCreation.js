@@ -3,6 +3,10 @@ const { getStorage, ref, uploadBytes } = require('firebase/storage');
 
 const express = require('express');
 const postgres = require('postgres');
+
+
+// Enable CORS for all routes
+
 const multer = require('multer');
 const upload = multer({
     storage: multer.memoryStorage(), // Use memory storage or configure a destination folder
@@ -11,8 +15,9 @@ const upload = multer({
     },
 });
 
-const config = require('./config'); //
-const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = config;
+require('dotenv').config();
+
+let { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = process.env;
 
 const sql = postgres({
     host: PGHOST,
@@ -44,14 +49,10 @@ router.post('/', upload.single('photo'), async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
-
         const { user_id, title, description, board_id } = req.body;
         const photoFileName = req.file.originalname;
-
         const storageRef = ref(storage, `uploads/${photoFileName}`);
-
         await uploadBytes(storageRef, req.file.buffer);
-
         const photoUrl = `uploads/${photoFileName}`;
         const newPost = await sql`
             INSERT INTO posts (user_id, photo_content, title, description)

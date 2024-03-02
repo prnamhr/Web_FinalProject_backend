@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const postgres = require('postgres');
-const config = require('./config'); //
+//
 const bcrypt = require('bcrypt'); // Import bcrypt
-const {PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID} = config;
+require('dotenv').config();
+
+let { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = process.env;
 const saltRounds = 10;
 const sql = postgres({
     host: PGHOST,
@@ -33,6 +35,7 @@ router.post('/', async (req, res) => {
         `;
         console.log(result[0])
         console.log(result)
+        res.json(result[0]);
         res.json(result[0]);
     } catch (error) {
         console.error(error);

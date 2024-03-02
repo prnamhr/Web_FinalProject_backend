@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const postgres = require('postgres');
 const nodemailer = require('nodemailer');
+require('dotenv').config();
 
-const config = require('./config'); //
-const {PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID} = config;
+require('dotenv').config();
+
+let { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = process.env;
 
 const sql = postgres({
     host: PGHOST,
@@ -66,7 +68,6 @@ router.post('/', async (req, res) => {
         res.status(500).json({error: 'Internal Server Error'});
     }
 });
-
 
 
 router.get('/:username/finduser', async (req, res) => {

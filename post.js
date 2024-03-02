@@ -1,9 +1,8 @@
 const express = require('express');
 const postgres = require('postgres');
-const cors = require('cors');
-const config = require('./config'); //
-const {PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID} = config;
+require('dotenv').config();
 
+let { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = process.env;
 const sql = postgres({
     host: PGHOST,
     database: PGDATABASE,
@@ -17,7 +16,6 @@ const sql = postgres({
 });
 
 const router = express.Router(); // Fixed typo here
-router.use(cors());
 router.get('/:postId', async (req, res) => {
     const {postId} = req.params;
 

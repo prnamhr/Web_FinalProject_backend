@@ -7,7 +7,7 @@ const postCreation = require('./PostCreation');
 const bcrypt = require('bcrypt'); // Import bcrypt
 const post = require('./post');
 const user = require('./User');
-const cors = require('cors');
+require('dotenv').config()
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}))
@@ -24,11 +24,12 @@ app.use('/forgotpassword', forgotpassword);
 app.use('/postCreation', postCreation);
 app.use('/post', post);
 app.use('/user', user);
-app.use(cors());
+
 const port = 3000;
 
-const config = require('./config'); //
-const {PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID} = config;
+require('dotenv').config();
+
+let { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = process.env;
 
 const sql = postgres({
     host: PGHOST,
@@ -46,15 +47,16 @@ const sql = postgres({
 app.post('/', async (req, res) => {
     try {
         const { email, password } = req.body;
-
+        console.log(email,password)
         // Fetch the user by email
         const user = await sql`
             SELECT * FROM users WHERE email = ${email}
         `;
 
+
         if (user.length === 0) {
             // User not found
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return res.json(0);
         }
 
         // Compare the hashed password
