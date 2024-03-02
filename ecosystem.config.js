@@ -4,8 +4,7 @@ module.exports={
         name:'Backend',
         script:'Index.js',
         env:{
-            NODE_ENV:'development'
+            NODE_ENV:'development',
         }
-    }]
-
+    }],
 }
