@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const firebase = require('firebase/app');
-const { getAnalytics } = require('firebase/analytics');
-const { getStorage, ref, uploadBytes } = require('firebase/storage');
+const {getAnalytics} = require('firebase/analytics');
+const {getStorage, ref, uploadBytes} = require('firebase/storage');
 
 const config = require('./config');
 const postgres = require("postgres");
@@ -13,7 +13,7 @@ const upload = multer({
         fileSize: 1024 * 1024 * 20, // 20MB limit
     },
 });
-const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = config;
+const {PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID} = config;
 
 const sql = postgres({
     host: PGHOST,
@@ -42,10 +42,10 @@ const storage = getStorage(app)
 
 router.post('/:userId/photo', upload.single('photo'), async (req, res) => {
     try {
-        const { userId } = req.params;
+        const {userId} = req.params;
 
         if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded' });
+            return res.status(400).json({error: 'No file uploaded'});
         }
 
         const photoFileName = req.file.originalname;
@@ -63,13 +63,13 @@ router.post('/:userId/photo', upload.single('photo'), async (req, res) => {
         res.json(updatedUser[0]);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 router.post('/:userId/update', async (req, res) => {
     try {
-        const { userId } = req.params;
-        const { first_name, last_name, bio, username } = req.body;
+        const {userId} = req.params;
+        const {first_name, last_name, bio, username} = req.body;
         let updatedUser;
         if (first_name) {
 
@@ -105,17 +105,17 @@ router.post('/:userId/update', async (req, res) => {
                 RETURNING *
             `;
         }
-        res.json({ success: true, message: 'Profile updated successfully'});
+        res.json(updatedUser[0]);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 
 router.post('/:userId/account', async (req, res) => {
     try {
-        const { userId } = req.params;
-        const { email, password, gender } = req.body;
+        const {userId} = req.params;
+        const {email, password, gender} = req.body;
         let updatedUser;
         if (email) {
 
@@ -143,15 +143,15 @@ router.post('/:userId/account', async (req, res) => {
                 RETURNING *
             `;
         }
-        res.json({ success: true, message: 'Profile updated successfully'});
+        res.json({success: true, message: 'Profile updated successfully'});
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 router.get('/:userId/followers', async (req, res) => {
     try {
-        const { userId } = req.params;
+        const {userId} = req.params;
 
         const followers = await sql`
             SELECT *
@@ -163,14 +163,14 @@ router.get('/:userId/followers', async (req, res) => {
         res.json(followers);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 
 
 router.get('/:userId/posts', async (req, res) => {
     try {
-        const { userId } = req.params;
+        const {userId} = req.params;
 
         const posts = await sql`
             SELECT *
@@ -182,13 +182,13 @@ router.get('/:userId/posts', async (req, res) => {
         res.json(posts);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 
 router.get('/:userId/following', async (req, res) => {
     try {
-        const { userId } = req.params;
+        const {userId} = req.params;
         console.log(userId)
         const following = await sql`
             SELECT *
@@ -200,23 +200,23 @@ router.get('/:userId/following', async (req, res) => {
         res.json(following);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 
 router.delete('/:userId/delete', async (req, res) => {
     try {
-        const { userId } = req.params;
+        const {userId} = req.params;
 
 
         await sql`DELETE FROM users WHERE user_id = ${userId}`;
 
         // You might want to delete associated data from other tables (e.g., followers, following)
 
-        res.json({ success: true, message: 'Account deleted successfully' });
+        res.json({success: true, message: 'Account deleted successfully'});
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 

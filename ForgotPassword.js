@@ -33,7 +33,7 @@ async function sendResetPasswordEmail(email, username) {
         subject: 'Password Reset',
         text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n
         Please click on the following link, or paste this into your browser to complete the process:\n\n
-        http://localhost:5174/${username}\n\n
+        http://localhost:5173/${username}/findUser\n\n
         If you did not request this, please ignore this email and your password will remain unchanged.\n`,
     };
 
@@ -62,6 +62,23 @@ router.post('/', async (req, res) => {
         res.json({message: 'Password reset email sent successfully'});
     } catch (error) {
 
+        console.error(error);
+        res.status(500).json({error: 'Internal Server Error'});
+    }
+});
+
+
+
+router.get('/:username/finduser', async (req, res) => {
+    try {
+        const {username} = req.params;
+        const existingUser = await sql`
+    SELECT * FROM users
+    WHERE username LIKE '%' || ${username} || '%' OR email = ${username};
+`;
+
+        res.json(existingUser[0]);
+    } catch (error) {
         console.error(error);
         res.status(500).json({error: 'Internal Server Error'});
     }

@@ -4,8 +4,9 @@ const app = express();
 const signupRouter = require('./signup');
 const forgotpassword = require('./ForgotPassword');
 const postCreation = require('./PostCreation');
+const bcrypt = require('bcrypt'); // Import bcrypt
 const post = require('./post');
-const user=require('./User');
+const user = require('./User');
 const cors = require('cors');
 
 app.use(express.json());
@@ -42,16 +43,33 @@ const sql = postgres({
 });
 
 
-app.get('/', async (req, res) => {
+app.post('/', async (req, res) => {
     try {
-        const {email, password} = req.query;
-        const existingUser = await sql`
-        SELECT *  FROM users WHERE email = ${email} and password = ${password}
-      `;
-        res.json(existingUser);
+        const { email, password } = req.body;
+
+        // Fetch the user by email
+        const user = await sql`
+            SELECT * FROM users WHERE email = ${email}
+        `;
+
+        if (user.length === 0) {
+            // User not found
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Compare the hashed password
+        const match = await bcrypt.compare(password, user[0].password);
+
+        if (match) {
+            // Passwords match, authentication successful
+            res.json(user[0]);
+        } else {
+            // Passwords do not match
+            res.status(401).json({ error: 'Invalid credentials' });
+        }
     } catch (error) {
         console.error(error);
-        res.status(500).json({error: 'Internal Server Error'});
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 

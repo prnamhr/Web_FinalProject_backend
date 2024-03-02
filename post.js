@@ -2,7 +2,7 @@ const express = require('express');
 const postgres = require('postgres');
 const cors = require('cors');
 const config = require('./config'); //
-const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = config;
+const {PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID} = config;
 
 const sql = postgres({
     host: PGHOST,
@@ -19,7 +19,7 @@ const sql = postgres({
 const router = express.Router(); // Fixed typo here
 router.use(cors());
 router.get('/:postId', async (req, res) => {
-    const { postId } = req.params;
+    const {postId} = req.params;
 
     try {
         const post = await sql`
@@ -29,19 +29,19 @@ router.get('/:postId', async (req, res) => {
             WHERE posts.post_Id = ${postId}`;
 
         if (post.length === 0) {
-            return res.status(404).json({ error: 'Post not found' });
+            return res.status(404).json({error: 'Post not found'});
         }
 
         res.json(post[0]);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 router.post('/:postId/update', async (req, res) => {
     try {
-        const { postId } = req.params;
-        const { title,description  } = req.body;
+        const {postId} = req.params;
+        const {title, description} = req.body;
         let updatedUser;
         if (title) {
 
@@ -61,16 +61,16 @@ router.post('/:postId/update', async (req, res) => {
                 RETURNING *
             `;
         }
-        res.json({ success: true, message: 'Profile updated successfully'});
+        res.json({success: true, message: 'Profile updated successfully'});
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 
 router.post('/:username/:postId/comment', async (req, res) => {
-    const { username,postId } = req.params;
-    const { comment_text } = req.body;
+    const {username, postId} = req.params;
+    const {comment_text} = req.body;
     try {
         const result = await sql`
             INSERT INTO comments (post_id, user_id, comment_text)
@@ -80,12 +80,12 @@ router.post('/:username/:postId/comment', async (req, res) => {
         res.status(201).json(result[0]);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 
 router.get('/:postId/comments', async (req, res) => {
-    const { postId } = req.params;
+    const {postId} = req.params;
 
     try {
         const comments = await sql`
@@ -95,11 +95,11 @@ router.get('/:postId/comments', async (req, res) => {
         res.json(comments);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 router.get('/:username/isFollowing/:targetUsername', async (req, res) => {
-    const { username, targetUsername } = req.params;
+    const {username, targetUsername} = req.params;
 
     try {
         // Check if the user is following the target user
@@ -108,15 +108,15 @@ router.get('/:username/isFollowing/:targetUsername', async (req, res) => {
             WHERE user_id = (SELECT user_id FROM users WHERE username = ${username})
             AND following_user_id = (SELECT user_id FROM users WHERE username = ${targetUsername})`;
 
-        res.json({ isFollowing: isFollowing.length > 0 });
+        res.json({isFollowing: isFollowing.length > 0});
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 
 router.get('/:userId/:postId/isSaved/', async (req, res) => {
-    const { userId,postId } = req.params;
+    const {userId, postId} = req.params;
 
     try {
 
@@ -125,18 +125,18 @@ router.get('/:userId/:postId/isSaved/', async (req, res) => {
             WHERE user_id =  ${userId}
             AND post_Id =  ${postId}`;
 
-        res.json({ isSaved: isSaved.length > 0 });
+        res.json({isSaved: isSaved.length > 0});
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 
 router.post('/:username/follow', async (req, res) => {
-    const { username } = req.params;
+    const {username} = req.params;
     console.log(username);
 
-    const { user_id } = req.body;
+    const {user_id} = req.body;
     console.log(user_id);
     try {
         const isFollowing = await sql`
@@ -154,7 +154,7 @@ router.post('/:username/follow', async (req, res) => {
                 DELETE FROM followers
                 WHERE user_id = ${user_id}
                 AND follower_user_id = (SELECT user_id FROM users WHERE username = ${username})`;
-            res.json({ isFollowing: false });
+            res.json({isFollowing: false});
         } else {
 
             const result = await sql`
@@ -168,18 +168,18 @@ router.post('/:username/follow', async (req, res) => {
             await sql`
                 INSERT INTO followers (user_id, follower_user_id)
                 VALUES (${user_id}, (SELECT user_id FROM users WHERE username = ${username}))`;
-            
-            res.json({ isFollowing: true });
+
+            res.json({isFollowing: true});
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 
 router.post('/:postId/savePost', async (req, res) => {
-    const { postId } = req.params;
-    const { user_id } = req.body;
+    const {postId} = req.params;
+    const {user_id} = req.body;
 
     try {
         const isSave = await sql`
@@ -193,7 +193,7 @@ router.post('/:postId/savePost', async (req, res) => {
                 WHERE user_id =  ${user_id}
                 AND post_id= ${postId}`;
 
-            res.json({ isFollowing: false });
+            res.json({isFollowing: false});
         } else {
             const result = await sql`
                 INSERT INTO saved_posts (user_id, post_id)
@@ -203,30 +203,30 @@ router.post('/:postId/savePost', async (req, res) => {
                 )
                 RETURNING *`;
 
-            res.json({ isFollowing: true });
+            res.json({isFollowing: true});
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 
 router.delete('/:postId/delete', async (req, res) => {
     try {
-        const { postId } = req.params;
+        const {postId} = req.params;
 
         await sql`DELETE FROM posts WHERE post_id = ${postId}`;
 
         // You might want to delete associated data from other tables (e.g., followers, following)
 
-        res.json({ success: true, message: 'Account deleted successfully' });
+        res.json({success: true, message: 'Account deleted successfully'});
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 router.get('/:postId/likes', async (req, res) => {
-    const { postId } = req.params;
+    const {postId} = req.params;
 
     try {
         const likes = await sql`
@@ -236,11 +236,11 @@ router.get('/:postId/likes', async (req, res) => {
         res.json(likes);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 router.post('/:username/:postId/like', async (req, res) => {
-    const { username, postId } = req.params;
+    const {username, postId} = req.params;
 
     try {
         // Check if the user already liked the post
@@ -256,7 +256,7 @@ router.post('/:username/:postId/like', async (req, res) => {
                 WHERE user_id = (SELECT user_id FROM users WHERE username = ${username})
                 AND post_id = ${postId}`;
 
-            res.json({ isLiked: false });
+            res.json({isLiked: false});
         } else {
             // User hasn't liked the post, add the like
             const result = await sql`
@@ -267,15 +267,15 @@ router.post('/:username/:postId/like', async (req, res) => {
                 )
                 RETURNING *`;
 
-            res.json({ isLiked: true });
+            res.json({isLiked: true});
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 router.get('/:username/:postId/like', async (req, res) => {
-    const { username,postId } = req.params;
+    const {username, postId} = req.params;
 
     try {
         // Check if the user liked the post
@@ -284,16 +284,16 @@ router.get('/:username/:postId/like', async (req, res) => {
             WHERE user_id = (SELECT user_id FROM users WHERE username = ${username})
             AND post_id = ${postId}`;
 
-        res.json({ isLiked: likedPost.length > 0 });
+        res.json({isLiked: likedPost.length > 0});
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 
 router.get('/:userId/saveList', async (req, res) => {
     try {
-        const { userId } = req.params;
+        const {userId} = req.params;
 
         const followers = await sql`
             SELECT *
@@ -307,7 +307,7 @@ router.get('/:userId/saveList', async (req, res) => {
         res.json(followers);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     }
 });
 

@@ -54,8 +54,8 @@ router.post('/', upload.single('photo'), async (req, res) => {
 
         const photoUrl = `uploads/${photoFileName}`;
         const newPost = await sql`
-            INSERT INTO posts (user_id, photo_content, title, description, board_id)
-            VALUES (${user_id}, ${photoUrl}, ${title || null}, ${description || null}, ${board_id || null})
+            INSERT INTO posts (user_id, photo_content, title, description)
+            VALUES (${user_id}, ${photoUrl}, ${title || null}, ${description || null})
             RETURNING *;
         `;
         res.json(newPost[0]);

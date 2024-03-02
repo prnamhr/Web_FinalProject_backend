@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const postgres = require('postgres');
 const config = require('./config'); //
+const bcrypt = require('bcrypt'); // Import bcrypt
 const {PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID} = config;
-
+const saltRounds = 10;
 const sql = postgres({
     host: PGHOST,
     database: PGDATABASE,
@@ -18,17 +19,24 @@ const sql = postgres({
 
 router.post('/', async (req, res) => {
     try {
-        const {first_name, last_name, email, password} = req.body;
+        const { first_name, last_name, email, password } = req.body;
 
+        const username = email.split('@')[0];
 
-        username = email.split('@')[0];
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
         const result = await sql`
-      INSERT INTO users (email, username, password,first_name,last_name)
-      VALUES ( ${email},${username}, ${password},${first_name},${last_name})`;
-        res.status(201).json(result[0]);
+            INSERT INTO users (email, username, password, first_name, last_name)
+            VALUES (${email}, ${username}, ${hashedPassword}, ${first_name}, ${last_name})
+              RETURNING *;
+        `;
+        console.log(result[0])
+        console.log(result)
+        res.json(result[0]);
     } catch (error) {
         console.error(error);
-        res.status(500).json({error: 'Internal Server Error'});
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
