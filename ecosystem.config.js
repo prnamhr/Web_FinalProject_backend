@@ -1,4 +1,4 @@
-mpdule.export={
+module.export={
     app:[{
         name:'backend',
         script:'index.js',
