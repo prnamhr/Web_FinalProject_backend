@@ -4,7 +4,6 @@ const firebase = require('firebase/app');
 const {getAnalytics} = require('firebase/analytics');
 const {getStorage, ref, uploadBytes} = require('firebase/storage');
 
-const config = require('./config');
 const postgres = require("postgres");
 const multer = require('multer');
 const upload = multer({
@@ -13,7 +12,9 @@ const upload = multer({
         fileSize: 1024 * 1024 * 20, // 20MB limit
     },
 });
-const {PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID} = config;
+require('dotenv').config();
+
+let { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = process.env;
 
 const sql = postgres({
     host: PGHOST,
