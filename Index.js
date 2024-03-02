@@ -25,7 +25,7 @@ app.use('/postCreation', postCreation);
 app.use('/post', post);
 app.use('/user', user);
 
-const port = 3000;
+const port = 3001;
 
 require('dotenv').config();
 
